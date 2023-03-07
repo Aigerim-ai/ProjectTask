@@ -1,0 +1,28 @@
+.object-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+  }
+  
+  .object-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    animation: move-object 5s ease-in-out forwards;
+  }
+  
+  @keyframes move-object {
+    0% {
+      transform: translateX(0);
+      opacity: 0;
+    }
+    50% {
+      transform: translateX(400px);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(800px);
+      opacity: 0;
+    }
+  }
