@@ -1,101 +1,90 @@
-import React, { useState, useMemo, useEffect } from 'react';
-const requireImages = require.context('../assets/genplan/first/images', false, /\.jpg$/);
+import React, { useState, useMemo, useEffect } from "react";
 
-const images = {
-  first: require.context('../assets/genplan/first/images', false, /\.jpg$/),
-  second: require.context('../assets/genplan/second/images', false, /\.jpg$/),
-  third: require.context('../assets/genplan/third/images', false, /\.jpg$/),
+function importImages(r) {
+  let images = {};
+  r.keys().forEach((item, index) => {
+    images[item.replace("./", "")] = r(item);
+  });
+  return images;
 }
 
+const images = {
+  first: importImages(
+    require.context("../assets/genplan/first/images", false, /\.jpg$/)
+  ),
+  second: importImages(
+    require.context("../assets/genplan/second/images", false, /\.jpg$/)
+  ),
+  third: importImages(
+    require.context("../assets/genplan/third/images", false, /\.jpg$/)
+  ),
+};
+
 function ImageMotion() {
-  const [currentFolder, setCurrentFolder] = useState(1);
-  const [currentIndex, setIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
+  const [currentFolder, setCurrentFolder] = useState("first");
 
-  const images1 = useMemo(() => {
-    const list = []
-    images.first.keys().forEach(filename => {
-      list.push(images.first(filename));
-    });
-    return images
-  }, [])
-
-  const images2 = useMemo(() => {
-    const list = []
-    images.second.keys().forEach(filename => {
-      list.push(images.second(filename));
-    });
-    return images
-  }, [])
-
-  const images3 = useMemo(() => {
-    const list = []
-    images.third.keys().forEach(filename => {
-      list.push(images.third(filename));
-    });
-    return images
-  }, [])
-
-  const animate = async () => {
-    const list = currentFolder === 1 ? images1 : currentFolder === 2 ? images2 : images3
-    for (let item of list) {
-      setIndex(currentImage => (currentImage + 1) % images1.length);
-      await new Promise(res => setTimeout(res, 100))
-    }      
-  }
-
-  function nextstep() {
-    // setDirection(1)
-    // const interval = setInterval(() => {
-    //   setIndex(currentImage => (currentImage + 1) % images1.length);
-    // }, 100);
-    // if (currentIndex === images1.length - 1) {
-
-    //   return () => clearInterval(interval);
-    // }
-    const i = {
-      1: 2,
-      2: 3,
-      3: 1
-    }
-    setCurrentFolder(prev => i[prev])
-  }
-
-  function prevstep() {
-    // setDirection(-1);
-    // const interval = setInterval(() => {
-    //   setIndex(currentImage => (currentImage - 1) % images1.length);
-    // }, 100);
-
-    // return () => clearInterval(interval);
-    const i = {
-      1: 3,
-      2: 1,
-      3: 2
-    }
-    setCurrentFolder(prev => i[prev])
-  }
-
-  useEffect(() => {
-
-    animate();
-  },[currentFolder, currentIndex, direction])
   return (
     <div className="container">
-      <div className='slideshow'>
-        <img
-          src={
-            currentFolder===1 ? images1[currentIndex] :
-          currentFolder===2 ? images2[currentIndex] :
-          images3[currentIndex]
-          }
-        />
-
+      <div className="slideshow">
+        {currentFolder === "first" && <Images folder={currentFolder} />}
+        {currentFolder === "second" && <Images folder={currentFolder} />}
+        {currentFolder === "third" && <Images folder={currentFolder} />}
       </div>
-      <button onClick={prevstep} className='prev'>prev</button>
-      <button onClick={nextstep} className='next'>next</button>
+      <button
+        onClick={() => {
+          const target = {
+            first: "second",
+            second: "third",
+            third: "first",
+          };
+          setCurrentFolder(target[currentFolder]);
+        }}
+      >
+        Previous
+      </button>
+      <button
+        onClick={() => {
+          const target = {
+            first: "third",
+            second: "first",
+            third: "second",
+          };
+          setCurrentFolder(target[currentFolder]);
+        }}
+      >
+        Next
+      </button>
+      <span>{currentFolder}</span>
     </div>
   );
 }
+
+const Images = ({ folder }) => {
+  const [currentImage, setCurrentImage] = useState();
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const imagesFolder = images[folder];
+      const keys = Object.keys(imagesFolder);
+      if (currentIndex === keys.length - 1) return;
+      const nextIndex = currentIndex + 1;
+      setCurrentImage(imagesFolder[keys[nextIndex]]);
+      setCurrentIndex(nextIndex);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [currentIndex]);
+
+  return (
+    <img
+      src={currentImage}
+      style={{
+        height: "70vh",
+        width: "80vw",
+      }}
+    />
+  );
+};
 
 export default ImageMotion;
