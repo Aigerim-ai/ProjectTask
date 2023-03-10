@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+const requireImages = require.context('../assets/genplan/first/images', false, /\.jpg$/);
 
 const images = {
   first: require.context('../assets/genplan/first/images', false, /\.jpg$/),
@@ -37,18 +38,21 @@ function ImageMotion() {
 
   const animate = async () => {
     const list = currentFolder === 1 ? images1 : currentFolder === 2 ? images2 : images3
-    console.log(list)
-    for (const item of list) {
-      setIndex(currentImage => (currentImage + 1) % item.length);
+    for (let item of list) {
+      setIndex(currentImage => (currentImage + 1) % images1.length);
       await new Promise(res => setTimeout(res, 100))
-    } 
- 
+    }      
   }
-useEffect(() => {
-animate()
-},[])
-  function nextstep() {
 
+  function nextstep() {
+    // setDirection(1)
+    // const interval = setInterval(() => {
+    //   setIndex(currentImage => (currentImage + 1) % images1.length);
+    // }, 100);
+    // if (currentIndex === images1.length - 1) {
+
+    //   return () => clearInterval(interval);
+    // }
     const i = {
       1: 2,
       2: 3,
@@ -58,6 +62,12 @@ animate()
   }
 
   function prevstep() {
+    // setDirection(-1);
+    // const interval = setInterval(() => {
+    //   setIndex(currentImage => (currentImage - 1) % images1.length);
+    // }, 100);
+
+    // return () => clearInterval(interval);
     const i = {
       1: 3,
       2: 1,
@@ -65,12 +75,20 @@ animate()
     }
     setCurrentFolder(prev => i[prev])
   }
-console.log(currentFolder)
+
+  useEffect(() => {
+
+    animate();
+  },[currentFolder, currentIndex, direction])
   return (
     <div className="container">
       <div className='slideshow'>
         <img
-          src={currentFolder}
+          src={
+            currentFolder===1 ? images1[currentIndex] :
+          currentFolder===2 ? images2[currentIndex] :
+          images3[currentIndex]
+          }
         />
 
       </div>
